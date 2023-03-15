@@ -4,9 +4,7 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, synchronize, reopened]
-
+      
 env:
   # Package Config
   SONAR_PROJECT_NAME: "sangeethnandakumar_Twileloop.JetAPI"
