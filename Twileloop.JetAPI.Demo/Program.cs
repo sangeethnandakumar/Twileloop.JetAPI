@@ -147,7 +147,6 @@ static async Task GET_HandleExceptions() {
 
     var response = await new JetRequest<dynamic>()
                             .Get()
-                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
                             .HandleExceptions(
                                 ex => {
                                     Console.WriteLine($"An exception occured. Message: {ex.Message}");
@@ -162,7 +161,6 @@ static async Task GET_WithCaptures() {
 
     var response = await new JetRequest<dynamic>()
                             .Get()
-                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
                             .WithCaptures(
                                 successResponse => {
                                     Console.WriteLine("Success");
