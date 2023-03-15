@@ -1,7 +1,10 @@
 ﻿using System.Text.Json;
 using Twileloop.JetAPI;
+using Twileloop.JetAPI.Authentication;
+using Twileloop.JetAPI.Body;
+using Twileloop.JetAPI.Types;
 
-await PUT_WithObjectAsJSONBody();
+await GET_WithBasicAuthentication();
 
 //Default GET API
 static async Task GET_Default() {
@@ -43,7 +46,7 @@ static async Task POST_WithJSONString() {
     var response = await new JetRequest()
                             .Post()
                             .WithBody(
-                                new RawBody(BodyType.Json, jsonString) 
+                                new RawBody(BodyType.Json, jsonString)
                             )
                             .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts");
     PrintResponse(response);
@@ -88,11 +91,39 @@ static async Task PUT_WithObjectAsJSONBody() {
 }
 
 
+//With Basic Authentication
+static async Task GET_WithBasicAuthentication() {
 
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BasicAuthentication {
+                                Username = "username",
+                                Password = "password",
+                                EncodeAsBase64 = true
+                            })
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
 
+//With API_KEY Authentication
+static async Task GET_WithAPIKEYAuthentication() {
 
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new ApiKey("Api-Key", "<API_KEY>"))
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
 
+//With Bearer Authentication
+static async Task GET_WithBearerAuthentication() {
 
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
 
 //Common function to print to console
 static void PrintResponse(dynamic response) {
