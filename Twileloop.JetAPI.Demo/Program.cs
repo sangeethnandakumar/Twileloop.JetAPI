@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Twileloop.JetAPI;
 
-await PUT_WithObjectAsJSONBody();
+await GET_WithBasicAuthentication();
 
 //Default GET API
 static async Task GET_Default() {
@@ -87,6 +87,40 @@ static async Task PUT_WithObjectAsJSONBody() {
     PrintResponse(response);
 }
 
+
+//With Basic Authentication
+static async Task GET_WithBasicAuthentication() {
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BasicAuthentication {
+                                Username = "username",
+                                Password = "password",
+                                EncodeAsBase64 = true
+                            })
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
+
+//With API_KEY Authentication
+static async Task GET_WithAPIKEYAuthentication() {
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new ApiKey("Api-Key", "<API_KEY>"))
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
+
+//With Bearer Authentication
+static async Task GET_WithBearerAuthentication() {
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
 
 
 

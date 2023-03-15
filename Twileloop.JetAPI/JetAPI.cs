@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -75,6 +76,36 @@ namespace Twileloop.JetAPI {
             return this;
         }
 
+        public JetRequest WithAuthentication(BasicAuthentication basicAuth) {
+            if (basicAuth == null) {
+                throw new ArgumentNullException(nameof(basicAuth));
+            }
+            if (basicAuth.EncodeAsBase64) {
+                var encodedCredentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicAuth.Username}:{basicAuth.Password}"));
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedCredentials);
+            }
+            else {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", $"{basicAuth.Username}:{basicAuth.Password}");
+            }
+            return this;
+        }
+
+        public JetRequest WithAuthentication(ApiKey apiKey) {
+            if (apiKey == null) {
+                throw new ArgumentNullException(nameof(apiKey));
+            }
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey.HeaderName, apiKey.APIKey);
+            return this;
+        }
+
+        public JetRequest WithAuthentication(BearerToken bearerToken) {
+            if (bearerToken == null) {
+                throw new ArgumentNullException(nameof(bearerToken));
+            }
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken.Token);
+            return this;
+        }
+
         public async Task<T> ExecuteAsync<T>(string url) {
             var uriBuilder = new UriBuilder(url);
             uriBuilder.Query = BuildQueryString(_queries);
@@ -117,6 +148,12 @@ namespace Twileloop.JetAPI {
         }
     }
 
+    public class BasicAuthentication {
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public bool EncodeAsBase64 { get; set; }
+    }
+
     public class RawBody {
         public string Content { get; }
         public string ContentType { get; }
@@ -154,8 +191,7 @@ namespace Twileloop.JetAPI {
                     break;
                 case BodyType.XML:
                     var serializer = new XmlSerializer(content.GetType());
-                    using (var writer = new StringWriter())
-                    {
+                    using (var writer = new StringWriter()) {
                         serializer.Serialize(writer, content);
                         Content = writer.ToString();
                     }
@@ -184,8 +220,26 @@ namespace Twileloop.JetAPI {
 
         public string Key { get; set; }
         public object Value { get; set; }
-        public string ValueString { get => JsonSerializer.Serialize(Value);}
-}
+        public string ValueString { get => JsonSerializer.Serialize(Value); }
+    }
+    public class ApiKey {
+        public ApiKey(string headerName, string aPIKey) {
+            HeaderName = headerName;
+            APIKey = aPIKey;
+        }
+
+        public string HeaderName { get; } = "Api-Key";
+        public string APIKey { get; }
+    }
+
+    public class BearerToken {
+        public BearerToken(string token) {
+            Token = token;
+        }
+
+        public string Token { get; }
+    }
+
 
 }
 
