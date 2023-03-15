@@ -283,15 +283,30 @@ namespace Twileloop.JetAPI {
 
                 //Response headers
                 var isResponseCookieExists = response.Headers.Any(x => x.Key == "Set-Cookie");
-                if(isResponseCookieExists) {
-                    var responseCookie = response.Headers.GetValues("Set-Cookie").SelectMany(c => c.Split(';'))
-                        .Select(c => c.Trim())
-                        .ToDictionary(c => c.Split('=')[0], c => c.Split('=')[1]);
+                if (isResponseCookieExists) {
+                    var responseCookie = new Dictionary<string, string>();
+                    foreach (var header in response.Headers.GetValues("Set-Cookie")) {
+                        foreach (var cookie in header.Split(';')) {
+                            var cookieParts = cookie.Trim().Split('=');
+                            if (cookieParts.Length == 2) {
+                                var key = cookieParts[0];
+                                var value = cookieParts[1];
+                                if (responseCookie.ContainsKey(key)) {
+                                    // Update existing key
+                                    responseCookie[key] = value;
+                                }
+                                else {
+                                    // Add new key-value pair
+                                    responseCookie.Add(key, value);
+                                }
+                            }
+                        }
+                    }
                     jetResponse.ResponseCookies = responseCookie;
                 }
 
                 //Response data
-                switch(_contentType) {
+                switch (_contentType) {
                     case ContentType.Json:
                         jetResponse.Data = await JsonSerializer.DeserializeAsync<T>(responseStream);
                         break;
