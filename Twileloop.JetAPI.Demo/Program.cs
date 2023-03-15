@@ -1,11 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using Twileloop.JetAPI;
 using Twileloop.JetAPI.Authentication;
 using Twileloop.JetAPI.Body;
 using Twileloop.JetAPI.Demo;
 using Twileloop.JetAPI.Types;
 
-await GET_WithInterceptor();
+await GET_WithExtendedCaptures();
 
 //Default GET API
 static async Task GET_Default() {
@@ -141,6 +142,54 @@ static async Task GET_WithInterceptor() {
     PrintResponse(response);
 }
 
+//On Exceptions
+static async Task GET_HandleExceptions() {
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
+                            .HandleExceptions(
+                                ex => {
+                                    Console.WriteLine($"An exception occured. Message: {ex.Message}");
+                                }
+                            )
+                            .ExecuteAsync<dynamic>("htt://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
+
+//With Captures
+static async Task GET_WithCaptures() {
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
+                            .WithCaptures(
+                                () => {
+                                    Console.WriteLine("Success");
+                                },
+                                () => {
+                                    Console.WriteLine("Failure");
+                                }
+                            )
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
+
+//With extended Captures
+static async Task GET_WithExtendedCaptures() {
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
+                            .WithCaptures(
+                                (HttpStatusCode.OK, () => Console.WriteLine("Ok")),
+                                (HttpStatusCode.NotFound, () => Console.WriteLine("Not Found")),
+                                (HttpStatusCode.Unauthorized, () => Console.WriteLine("UnAuthorized")),
+                                (HttpStatusCode.Forbidden, () => Console.WriteLine("Forbidden"))
+                            )
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/fake");
+    PrintResponse(response);
+}
 
 //Common function to print to console
 static void PrintResponse(dynamic response) {

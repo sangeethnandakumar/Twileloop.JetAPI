@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -18,8 +20,7 @@ namespace Twileloop.JetAPI {
         public Dictionary<string, string> QueryParameters { get; set; }
         public HttpContent HttpContent { get; set; }
 
-        public APIRequest(HttpMethod method)
-        {
+        public APIRequest(HttpMethod method) {
             HttpClient = new HttpClient();
             HttpMethod = method;
             Headers = new Dictionary<string, string>();
@@ -42,12 +43,16 @@ namespace Twileloop.JetAPI {
 
         private APIRequest _apiRequest;
         private Interceptor _interceptor;
+        private Action _successCapture;
+        private Action _failureCapture;
+        private Action<Exception> _onException;
+        private List<(HttpStatusCode, Action)> _extendedCaptures;
 
         /// <summary>
         /// Initializes a new instance of the JetRequest class with default HttpMethod Get.
         /// </summary>
         public JetRequest() {
-            _apiRequest = new APIRequest();           
+            _apiRequest = new APIRequest();
         }
 
         /// <summary>
@@ -173,15 +178,47 @@ namespace Twileloop.JetAPI {
             _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken.Token);
             return this;
         }
-        
+
         /// <summary>
-        /// Sets the bearer token authentication header for the HTTP request.
+        /// Pass an instance of interceptor to make hook events
         /// </summary>
-        /// <param name="bearerToken">The bearer token information to use for authentication.</param>
-        /// <returns>The JetRequest instance.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="bearerToken"/> is null.</exception>
-        public JetRequest WithInterceptor<T>(T instance) where T: Interceptor {
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance">An instance of Interceptor</param>
+        /// <returns></returns>
+        public JetRequest WithInterceptor<T>(T instance) where T : Interceptor {
             _interceptor = instance;
+            return this;
+        }
+
+        /// <summary>
+        /// Add a basic capture block to capture success and failures
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance">An instance of Interceptor</param>
+        /// <returns></returns>
+        public JetRequest WithCaptures(Action onSuccess, Action onFailure) {
+            _successCapture = onSuccess;
+            _failureCapture = onFailure;
+            return this;
+        }
+
+        /// <summary>
+        ///  Add a advanced capture block to capture success and failures
+        /// </summary>
+        /// <param name="extendedCaptures"></param>
+        /// <returns></returns>
+        public JetRequest WithCaptures(params (HttpStatusCode, Action)[] extendedCaptures) {
+            _extendedCaptures = extendedCaptures.ToList();
+            return this;
+        }
+
+        /// <summary>
+        /// Add a handler to capture exceptions
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
+        public JetRequest HandleExceptions(Action<Exception> exception) {
+            _onException = exception;
             return this;
         }
 
@@ -193,30 +230,50 @@ namespace Twileloop.JetAPI {
         /// <returns>A task representing the asynchronous operation. The result of the task is the deserialized response.</returns>
         /// <exception cref="HttpRequestException">Thrown when the HTTP request is not successful (status code is not in the 2xx range).</exception>
         public async Task<T> ExecuteAsync<T>(string url) {
-            _interceptor?.OnInit();
-            var uriBuilder = new UriBuilder(url);
-            uriBuilder.Query = BuildQueryString(_apiRequest.QueryParameters);
+            try {
+                _interceptor?.OnInit();
+                var uriBuilder = new UriBuilder(url);
+                uriBuilder.Query = BuildQueryString(_apiRequest.QueryParameters);
 
-            var request = new HttpRequestMessage {
-                Method = _apiRequest.HttpMethod,
-                RequestUri = uriBuilder.Uri,
-                Content = _apiRequest.HttpContent,
-            };
+                var request = new HttpRequestMessage {
+                    Method = _apiRequest.HttpMethod,
+                    RequestUri = uriBuilder.Uri,
+                    Content = _apiRequest.HttpContent,
+                };
 
-            foreach (var (key, value) in _apiRequest.Headers) {
-                request.Headers.Add(key, value);
+                foreach (var (key, value) in _apiRequest.Headers) {
+                    request.Headers.Add(key, value);
+                }
+
+                //Interceptors
+                _interceptor?.OnRequesting(_apiRequest);
+                var response = await _apiRequest.HttpClient.SendAsync(request);
+                _interceptor?.OnResponseReceived();
+
+                //Extended captures
+                if (_extendedCaptures != null) {
+                    foreach (var capture in _extendedCaptures) {
+                        if (capture.Item1 == response.StatusCode) {
+                            capture.Item2();
+                            break;
+                        }
+                    }
+                }
+
+                //Basic captures
+                if (!response.IsSuccessStatusCode) {
+                    _failureCapture?.Invoke();
+                }
+
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                _successCapture?.Invoke();
+
+                return await JsonSerializer.DeserializeAsync<T>(responseStream);
             }
-
-            _interceptor?.OnRequesting(_apiRequest);
-            var response = await _apiRequest.HttpClient.SendAsync(request);
-            _interceptor?.OnResponseReceived();
-
-            if (!response.IsSuccessStatusCode) {
-                throw new HttpRequestException($"Status code: {response.StatusCode}, Reason phrase: {response.ReasonPhrase}");
+            catch (Exception ex) {
+                _onException(ex);
+                return default;
             }
-
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<T>(responseStream);
         }
 
         /// <summary>
