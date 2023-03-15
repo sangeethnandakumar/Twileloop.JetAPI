@@ -7,7 +7,7 @@ namespace Twileloop.JetAPI.Demo {
             base.OnInit();
         }
 
-        public override void OnRequesting(APIRequest request) {
+        public override void OnRequesting(Request request) {
             base.OnRequesting(request);
         }
 

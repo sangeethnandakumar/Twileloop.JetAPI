@@ -1,5 +1,5 @@
 ﻿namespace Twileloop.JetAPI.Types {
-    public enum BodyType {
+    public enum ContentType {
         Json,
         XML,
         Text,

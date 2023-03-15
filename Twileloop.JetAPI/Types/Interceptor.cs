@@ -4,7 +4,7 @@
 
         }
 
-        public virtual void OnRequesting(APIRequest request) {
+        public virtual void OnRequesting(Request request) {
 
         }
 
