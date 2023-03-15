@@ -8,6 +8,8 @@ on:
 env:
   # Package Config
   SONAR_PROJECT_NAME: "sangeethnandakumar_Twileloop.JetAPI"
+  SONAR_EXCLUSIONS: "./Twileloop.JetAPI.Demo/Twileloop.JetAPI.Demo.csproj"
+  SONAR_INCLUDED_FILES: "./Twileloop.JetAPI/Twileloop.JetAPI.csproj"
   
 jobs:
   build:
@@ -50,7 +52,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ env.SONAR_PROJECT_NAME }}" /o:"sangeethnandakumar" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"${{ env.SONAR_PROJECT_NAME }}" /o:"sangeethnandakumar" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.exclusions="${{ env.SONAR_EXCLUSIONS }}" /d:sonar.inclusions="${{ env.SONAR_INCLUDED_FILES }}"
           dotnet clean
           dotnet build
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
