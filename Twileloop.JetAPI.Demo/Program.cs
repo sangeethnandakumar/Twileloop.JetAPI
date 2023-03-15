@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Twileloop.JetAPI;
 using Twileloop.JetAPI.Authentication;
+using Twileloop.JetAPI.Body;
 using Twileloop.JetAPI.Types;
 
 await GET_WithBasicAuthentication();
@@ -45,7 +46,7 @@ static async Task POST_WithJSONString() {
     var response = await new JetRequest()
                             .Post()
                             .WithBody(
-                                new RawBody(BodyType.Json, jsonString) 
+                                new RawBody(BodyType.Json, jsonString)
                             )
                             .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts");
     PrintResponse(response);
