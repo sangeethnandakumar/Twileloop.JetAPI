@@ -1,4 +1,4 @@
-name: "Deploy Twileloop.EPub"
+name: "Deploy Package"
 
 on:
   workflow_dispatch:
