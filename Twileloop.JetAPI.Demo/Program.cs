@@ -2,9 +2,10 @@
 using Twileloop.JetAPI;
 using Twileloop.JetAPI.Authentication;
 using Twileloop.JetAPI.Body;
+using Twileloop.JetAPI.Demo;
 using Twileloop.JetAPI.Types;
 
-await GET_WithBasicAuthentication();
+await GET_WithInterceptor();
 
 //Default GET API
 static async Task GET_Default() {
@@ -124,6 +125,22 @@ static async Task GET_WithBearerAuthentication() {
                             .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
     PrintResponse(response);
 }
+
+
+
+//With Interceptors
+static async Task GET_WithInterceptor() {
+
+    var interceptor = new CustomInterceptor();
+
+    var response = await new JetRequest()
+                            .Get()
+                            .WithAuthentication(new BearerToken("<BEARER_TOKEN>"))
+                            .WithInterceptor(interceptor)
+                            .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
+    PrintResponse(response);
+}
+
 
 //Common function to print to console
 static void PrintResponse(dynamic response) {

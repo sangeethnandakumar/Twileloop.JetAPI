@@ -10,32 +10,52 @@ using Twileloop.JetAPI.Body;
 using Twileloop.JetAPI.Types;
 
 namespace Twileloop.JetAPI {
+
+    public class APIRequest {
+        public HttpClient HttpClient { get; set; }
+        public HttpMethod HttpMethod { get; set; }
+        public Dictionary<string, string> Headers { get; set; }
+        public Dictionary<string, string> QueryParameters { get; set; }
+        public HttpContent HttpContent { get; set; }
+
+        public APIRequest(HttpMethod method)
+        {
+            HttpClient = new HttpClient();
+            HttpMethod = method;
+            Headers = new Dictionary<string, string>();
+            QueryParameters = new Dictionary<string, string>();
+        }
+
+        public APIRequest() {
+            HttpClient = new HttpClient();
+            HttpMethod = HttpMethod.Get;
+            Headers = new Dictionary<string, string>();
+            QueryParameters = new Dictionary<string, string>();
+        }
+    }
+    public class APIResponse {
+
+    }
+
+
     public class JetRequest {
-        private readonly HttpClient _httpClient;
-        private readonly HttpMethod _method;
-        private readonly Dictionary<string, string> _headers;
-        private readonly Dictionary<string, string> _queries;
-        private HttpContent _content;
+
+        private APIRequest _apiRequest;
+        private Interceptor _interceptor;
 
         /// <summary>
         /// Initializes a new instance of the JetRequest class with default HttpMethod Get.
         /// </summary>
         public JetRequest() {
-            _httpClient = new HttpClient();
-            _method = HttpMethod.Get;
-            _headers = new Dictionary<string, string>();
-            _queries = new Dictionary<string, string>();
+            _apiRequest = new APIRequest();           
         }
 
         /// <summary>
         /// Initializes a new instance of the JetRequest class with the specified HttpMethod.
         /// </summary>
         /// <param name="method">The HttpMethod to use for the request.</param>
-        public JetRequest(HttpMethod method) {
-            _httpClient = new HttpClient();
-            _method = method ?? throw new ArgumentNullException(nameof(method));
-            _headers = new Dictionary<string, string>();
-            _queries = new Dictionary<string, string>();
+        private JetRequest(HttpMethod method) {
+            _apiRequest = new APIRequest(method);
         }
 
         /// <summary>
@@ -82,7 +102,7 @@ namespace Twileloop.JetAPI {
             foreach (var param in headers) {
                 if (param.Key == null) throw new ArgumentNullException(nameof(param.Key));
                 if (param.Value == null) throw new ArgumentNullException(nameof(param.Value));
-                _headers[param.Key] = param.ValueString;
+                _apiRequest.Headers[param.Key] = param.ValueString;
             }
 
             return this;
@@ -100,7 +120,7 @@ namespace Twileloop.JetAPI {
             foreach (var param in queries) {
                 if (param.Key == null) throw new ArgumentNullException(nameof(param.Key));
                 if (param.Value == null) throw new ArgumentNullException(nameof(param.Value));
-                _queries[param.Key] = param.ValueString;
+                _apiRequest.QueryParameters[param.Key] = param.ValueString;
             }
 
             return this;
@@ -108,7 +128,7 @@ namespace Twileloop.JetAPI {
 
         public JetRequest WithBody(RawBody body) {
             if (body == null) throw new ArgumentNullException(nameof(body));
-            _content = new StringContent(body.Content, Encoding.UTF8, body.ContentType);
+            _apiRequest.HttpContent = new StringContent(body.Content, Encoding.UTF8, body.ContentType);
             return this;
         }
 
@@ -118,10 +138,10 @@ namespace Twileloop.JetAPI {
             }
             if (basicAuth.EncodeAsBase64) {
                 var encodedCredentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicAuth.Username}:{basicAuth.Password}"));
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedCredentials);
+                _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedCredentials);
             }
             else {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", $"{basicAuth.Username}:{basicAuth.Password}");
+                _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", $"{basicAuth.Username}:{basicAuth.Password}");
             }
             return this;
         }
@@ -136,7 +156,7 @@ namespace Twileloop.JetAPI {
             if (apiKey == null) {
                 throw new ArgumentNullException(nameof(apiKey));
             }
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey.HeaderName, apiKey.APIKey);
+            _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey.HeaderName, apiKey.APIKey);
             return this;
         }
 
@@ -150,7 +170,18 @@ namespace Twileloop.JetAPI {
             if (bearerToken == null) {
                 throw new ArgumentNullException(nameof(bearerToken));
             }
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken.Token);
+            _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken.Token);
+            return this;
+        }
+        
+        /// <summary>
+        /// Sets the bearer token authentication header for the HTTP request.
+        /// </summary>
+        /// <param name="bearerToken">The bearer token information to use for authentication.</param>
+        /// <returns>The JetRequest instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="bearerToken"/> is null.</exception>
+        public JetRequest WithInterceptor<T>(T instance) where T: Interceptor {
+            _interceptor = instance;
             return this;
         }
 
@@ -162,20 +193,23 @@ namespace Twileloop.JetAPI {
         /// <returns>A task representing the asynchronous operation. The result of the task is the deserialized response.</returns>
         /// <exception cref="HttpRequestException">Thrown when the HTTP request is not successful (status code is not in the 2xx range).</exception>
         public async Task<T> ExecuteAsync<T>(string url) {
+            _interceptor?.OnInit();
             var uriBuilder = new UriBuilder(url);
-            uriBuilder.Query = BuildQueryString(_queries);
+            uriBuilder.Query = BuildQueryString(_apiRequest.QueryParameters);
 
             var request = new HttpRequestMessage {
-                Method = _method,
+                Method = _apiRequest.HttpMethod,
                 RequestUri = uriBuilder.Uri,
-                Content = _content,
+                Content = _apiRequest.HttpContent,
             };
 
-            foreach (var (key, value) in _headers) {
+            foreach (var (key, value) in _apiRequest.Headers) {
                 request.Headers.Add(key, value);
             }
 
-            var response = await _httpClient.SendAsync(request);
+            _interceptor?.OnRequesting(_apiRequest);
+            var response = await _apiRequest.HttpClient.SendAsync(request);
+            _interceptor?.OnResponseReceived();
 
             if (!response.IsSuccessStatusCode) {
                 throw new HttpRequestException($"Status code: {response.StatusCode}, Reason phrase: {response.ReasonPhrase}");
