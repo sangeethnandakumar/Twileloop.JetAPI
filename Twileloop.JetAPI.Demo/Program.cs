@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using Twileloop.JetAPI;
+using Twileloop.JetAPI.Authentication;
+using Twileloop.JetAPI.Types;
 
 await GET_WithBasicAuthentication();
 
@@ -121,12 +123,6 @@ static async Task GET_WithBearerAuthentication() {
                             .ExecuteAsync<dynamic>("https://jsonplaceholder.typicode.com/posts/5");
     PrintResponse(response);
 }
-
-
-
-
-
-
 
 //Common function to print to console
 static void PrintResponse(dynamic response) {

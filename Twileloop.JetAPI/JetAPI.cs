@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Twileloop.JetAPI.Authentication;
+using Twileloop.JetAPI.Types;
 
 namespace Twileloop.JetAPI {
     public class JetRequest {
@@ -148,11 +150,7 @@ namespace Twileloop.JetAPI {
         }
     }
 
-    public class BasicAuthentication {
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public bool EncodeAsBase64 { get; set; }
-    }
+   
 
     public class RawBody {
         public string Content { get; }
@@ -204,41 +202,8 @@ namespace Twileloop.JetAPI {
 
     }
 
-    public enum BodyType {
-        Json,
-        XML,
-        Text,
-        HTML,
-        JavaScript
-    }
-
-    public struct Param {
-        public Param(string key, object value) : this() {
-            Key = key;
-            Value = value;
-        }
-
-        public string Key { get; set; }
-        public object Value { get; set; }
-        public string ValueString { get => JsonSerializer.Serialize(Value); }
-    }
-    public class ApiKey {
-        public ApiKey(string headerName, string aPIKey) {
-            HeaderName = headerName;
-            APIKey = aPIKey;
-        }
-
-        public string HeaderName { get; } = "Api-Key";
-        public string APIKey { get; }
-    }
-
-    public class BearerToken {
-        public BearerToken(string token) {
-            Token = token;
-        }
-
-        public string Token { get; }
-    }
+    
+    
 
 
 }
