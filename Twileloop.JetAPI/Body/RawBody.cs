@@ -24,16 +24,16 @@ namespace Twileloop.JetAPI.Body {
         /// <param name="bodyType">The type of the raw body.</param>
         /// <param name="content">The content of the raw body.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="content"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="bodyType"/> is not a valid <see cref="BodyType"/> value.</exception>
-        public RawBody(BodyType bodyType, string content) {
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="bodyType"/> is not a valid <see cref="Types.ContentType"/> value.</exception>
+        public RawBody(ContentType bodyType, string content) {
             if (content == null) throw new ArgumentNullException(nameof(content));
 
             ContentType = bodyType switch {
-                BodyType.Json => "application/json",
-                BodyType.XML => "application/xml",
-                BodyType.Text => "text/plain",
-                BodyType.HTML => "text/html",
-                BodyType.JavaScript => "application/javascript",
+                Types.ContentType.Json => "application/json",
+                Types.ContentType.XML => "application/xml",
+                Types.ContentType.Text => "text/plain",
+                Types.ContentType.HTML => "text/html",
+                Types.ContentType.JavaScript => "application/javascript",
                 _ => throw new ArgumentOutOfRangeException(nameof(bodyType), bodyType, null)
             };
 
@@ -46,24 +46,24 @@ namespace Twileloop.JetAPI.Body {
         /// <param name="bodyType">The type of the raw body.</param>
         /// <param name="content">The content of the raw body.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="content"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="bodyType"/> is not a valid <see cref="BodyType"/> value.</exception>
-        public RawBody(BodyType bodyType, object content) {
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="bodyType"/> is not a valid <see cref="Types.ContentType"/> value.</exception>
+        public RawBody(ContentType bodyType, object content) {
             if (content == null) throw new ArgumentNullException(nameof(content));
 
             ContentType = bodyType switch {
-                BodyType.Json => "application/json",
-                BodyType.XML => "application/xml",
-                BodyType.Text => "text/plain",
-                BodyType.HTML => "text/html",
-                BodyType.JavaScript => "application/javascript",
+                Types.ContentType.Json => "application/json",
+                Types.ContentType.XML => "application/xml",
+                Types.ContentType.Text => "text/plain",
+                Types.ContentType.HTML => "text/html",
+                Types.ContentType.JavaScript => "application/javascript",
                 _ => throw new ArgumentOutOfRangeException(nameof(bodyType), bodyType, null)
             };
 
             switch (bodyType) {
-                case BodyType.Json:
+                case Types.ContentType.Json:
                     Content = JsonSerializer.Serialize(content);
                     break;
-                case BodyType.XML:
+                case Types.ContentType.XML:
                     var serializer = new XmlSerializer(content.GetType());
                     using (var writer = new StringWriter()) {
                         serializer.Serialize(writer, content);
