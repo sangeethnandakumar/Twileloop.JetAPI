@@ -4,10 +4,25 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Title>Jet API</Title>
+    <Authors>Twileloop, Sangeeth Nandakumar</Authors>
+    <PackageProjectUrl>https://github.com/sangeethnandakumar/Twileloop.JetAPI</PackageProjectUrl>
+    <PackageIcon>logo.png</PackageIcon>
+    <RepositoryUrl>https://github.com/sangeethnandakumar/Twileloop.JetAPI</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>httpclient, api, client</PackageTags>
+    <Description>A fully free open source cross platform fluent APIClient for your .NET application</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="7.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
