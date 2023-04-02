@@ -198,7 +198,7 @@ namespace Twileloop.JetAPI {
             _apiRequest.Headers.Add("Cookie", cookieHeader);
             return this;
         }
-        
+
         /// <summary>
         /// Sets the content type of application
         /// </summary>
@@ -259,14 +259,14 @@ namespace Twileloop.JetAPI {
 
                 //Basic captures
                 if (!response.IsSuccessStatusCode) {
-                    var errorResponse =  new JetResponse<T> { 
+                    var errorResponse = new JetResponse<T> {
                         StatusCode = response.StatusCode,
                         Content = string.Empty,
                         Data = default,
-                        IsSuccessfully = false,
+                        IsSuccessfull = false,
                         ResponseCookies = new Dictionary<string, string>(),
                         ResponseHeaders = new Dictionary<string, string>(),
-                        };
+                    };
                     _failureCapture?.Invoke(errorResponse);
                     return errorResponse;
                 }
@@ -274,8 +274,8 @@ namespace Twileloop.JetAPI {
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 var jetResponse = new JetResponse<T> {
                     Content = await response.Content.ReadAsStringAsync(),
-                    StatusCode = response.StatusCode,                    
-                    IsSuccessfully = response.IsSuccessStatusCode,
+                    StatusCode = response.StatusCode,
+                    IsSuccessfull = response.IsSuccessStatusCode,
                     ResponseHeaders = response.Headers.ToDictionary(h => h.Key, h => string.Join(",", h.Value)),
                     Binary = await ReadStreamAsByteArray(responseStream)
                 };
@@ -306,29 +306,33 @@ namespace Twileloop.JetAPI {
                 }
 
                 //Response data
-                switch (_contentType) {
-                    case ContentType.Json:
-                        jetResponse.Data = await JsonSerializer.DeserializeAsync<T>(responseStream);
-                        break;
-                    case ContentType.XML:
-                        XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
-                        jetResponse.Data = (T)xmlSerializer.Deserialize(responseStream);
-                        break;
-                    default:
-                        jetResponse.Data = default;
-                        break;
-                }       
+                if (jetResponse.IsSuccessfull) {
+                    switch (_contentType) {
+                        case ContentType.Json:
+                            if (jetResponse.Content != null) {
+                                jetResponse.Data = JsonSerializer.Deserialize<T>(jetResponse.Content);
+                            }
+                            break;
+                        case ContentType.XML:
+                            XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+                            jetResponse.Data = (T)xmlSerializer.Deserialize(responseStream);
+                            break;
+                        default:
+                            jetResponse.Data = default;
+                            break;
+                    }
+                }
 
                 return jetResponse;
             }
             catch (Exception ex) {
-                if(_onException != null) {
+                if (_onException != null) {
                     _onException(ex);
                 }
                 return new JetResponse<T> {
                     Content = string.Empty,
                     Data = default,
-                    IsSuccessfully = false,
+                    IsSuccessfull = false,
                     ResponseCookies = new Dictionary<string, string>(),
                     ResponseHeaders = new Dictionary<string, string>(),
                 };
@@ -369,4 +373,3 @@ namespace Twileloop.JetAPI {
         }
     }
 }
-
