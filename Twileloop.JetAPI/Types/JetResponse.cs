@@ -7,7 +7,7 @@ namespace Twileloop.JetAPI.Types {
         public string Content { get; set; }
         public T Data { get; set; }
         public byte[] Binary { get; set; }
-        public bool IsSuccessfully { get; set; }
+        public bool IsSuccessfull { get; set; }
         public Dictionary<string, string> ResponseHeaders { get; set; }
         public Dictionary<string, string> ResponseCookies { get; set; }
     }
