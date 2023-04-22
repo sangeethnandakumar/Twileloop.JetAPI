@@ -22,7 +22,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
 
     - name: Run Tests
-      run: dotnet test Twileloop.JetAPI.Tests/Twileloop.JetAPI.Tests.csproj --logger "trx;LogFileName=test_results.xml" --no-build --verbosity normal
+      run: dotnet test ./Twileloop.JetAPI.Tests/Twileloop.JetAPI.Tests.csproj --logger "trx;LogFileName=test_results.xml" --no-build --verbosity normal
 
     - name: Upload Test Results
       uses: actions/upload-artifact@v2
