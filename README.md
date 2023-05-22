@@ -20,7 +20,7 @@ An easy to use conveinent fluent syntaxed HTTPClient for all your personal or co
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/sangeethnanda)
 
 ## Integration Guide
-Read full integration guide: https://packages.twileloop.com/Twileloop.Timezone
+Read full integration guide: https://packages.twileloop.com/Twileloop.JetAPI
 
 ## More Packages
 More trusted packages from Twileloop: https://packages.twileloop.com
