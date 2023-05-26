@@ -26,7 +26,7 @@ var response = await new JetRequest<dynamic>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/1");
 ```
 
-# GET 🠚 With Query Params
+## GET 🠚 With Query Params
 
 ```csharp
 var response = await new JetRequest<dynamic>()
@@ -37,7 +37,7 @@ var response = await new JetRequest<dynamic>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/comments");```
 ```
 
-# GET 🠚 With Headers
+## GET 🠚 With Headers
 
 ```csharp
 var response = await new JetRequest<dynamic>()
@@ -51,7 +51,7 @@ var response = await new JetRequest<dynamic>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/comments");                         .ExecuteAsync("https://jsonplaceholder.typicode.com/comments");```
 ```
 
-# POST 🠚 With JSON String
+## POST 🠚 With JSON String
 
 ```csharp
 var jsonString = @"{""title"":""Foo"",""bar"":""Bar"",""userid"":1}";
@@ -64,7 +64,7 @@ var response = await new JetRequest<dynamic>()
                         .ExecuteAsync("https://jsonplaceholder.typicode.com/posts");
 ```
 
-# PUT 🠚 With Object As JSON
+## PUT 🠚 With Object As JSON
 
 ```csharp
 var instance = new {
@@ -82,7 +82,7 @@ var response = await new JetRequest<MyResponseModel>()
 ```
 
 
-# GET 🠚 With Basic-Authentication
+## GET 🠚 With Basic-Authentication
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -94,7 +94,7 @@ var response = await new JetRequest<MyResponseModel>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/5");
 ```
 
-# GET 🠚 With JWT Bearer-Authentication
+## GET 🠚 With JWT Bearer-Authentication
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -103,7 +103,7 @@ var response = await new JetRequest<MyResponseModel>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/5");
 ```
 
-# GET 🠚 With API_KEY Authentication
+## GET 🠚 With API_KEY Authentication
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -112,7 +112,7 @@ var response = await new JetRequest<MyResponseModel>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/5");
 ```
 
-# PATCH 🠚 And Handle Exceptions Yourself
+## PATCH 🠚 And Handle Exceptions Yourself
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -123,7 +123,7 @@ var response = await new JetRequest<MyResponseModel>()
                          .ExecuteAsync("htt://jsonplaceholder.typicode.com/posts/5");
 ```
 
-# GET 🠚 With Success/Failure Captures
+## GET 🠚 With Success/Failure Captures
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -135,7 +135,7 @@ var response = await new JetRequest<MyResponseModel>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/5");
 ```
 
-# PUT 🠚 With Custom Captures Based On HTTP StatusCode
+## PUT 🠚 With Custom Captures Based On HTTP StatusCode
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -149,7 +149,7 @@ var response = await new JetRequest<MyResponseModel>()
                          .ExecuteAsync("https://jsonplaceholder.typicode.com/fake");
 ```
 
-# GET 🠚 As JSON/XML/HTML or TEXT
+## GET 🠚 As JSON/XML/HTML or TEXT
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -158,7 +158,7 @@ var response = await new JetRequest<MyResponseModel>()
                           .ExecuteAsync("https://samplexml.com/auth/demoxml.xml");
 ```
 
-# GET 🠚 And Pass Request Cookies
+## GET 🠚 And Pass Request Cookies
 
 ```csharp
 var response = await new JetRequest<MyResponseModel>()
@@ -170,7 +170,7 @@ var response = await new JetRequest<MyResponseModel>()
                           .ExecuteAsync("https://google.com");
 ```
 
-# Listen To Events With Interceptors
+## Listen To Events With Interceptors
 
 Create your own intercepter by inheriting from Interceptor base class
 ```csharp
