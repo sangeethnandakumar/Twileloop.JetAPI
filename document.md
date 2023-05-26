@@ -1,11 +1,11 @@
-﻿<!-- PROJECT LOGO -->
+<!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/sangeethnandakumar/Twileloop.JetAPI">
     <img src="https://iili.io/HgOLhu9.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h1 align="center"> Twileloop.JetAPI [BETA]</h1>
+  <h1 align="center"> Twileloop.JetAPI </h1> <small style="color: red">[BETA Pre-Release]</small>
   <h4 align="center"> Simple | Fluent | Fast </h4>
 
 </div>
