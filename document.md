@@ -5,7 +5,7 @@
     <img src="https://iili.io/HgOLhu9.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h2 align="center"> Twileloop.JetAPI </h2>
+  <h1 align="center"> Twileloop.JetAPI </h1>
   <h4 align="center"> Simple | Fluent | Fast </h4>
 
 </div>
