@@ -4,93 +4,84 @@ using Twileloop.JetAPI;
 using Twileloop.JetAPI.Authentication;
 using Twileloop.JetAPI.Body;
 using Twileloop.JetAPI.Demo;
+using Twileloop.JetAPI.DemoServer;
 using Twileloop.JetAPI.Types;
 
-await GET_WithCookies();
-
-//Default GET API
-static async Task GET_Default() {
-    var response = await new JetRequest<dynamic>()
-                            .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/1");
-    PrintResponse(response);
-}
-
-//GET with query parameters
-static async Task GET_WithQueryParameters() {
-    var response = await new JetRequest<dynamic>()
-                            .WithQueries(
-                                new Param("postId", 2)
-                            )
-                            .ExecuteAsync("https://jsonplaceholder.typicode.com/comments");
-    PrintResponse(response);
-}
-
-//Get with header parameters
-static async Task GET_WithHeaders() {
-    var response = await new JetRequest<dynamic>()
-                            .WithQueries(
-                                new Param("postId", 3)
-                            )
-                            .WithHeaders(
-                                new Param("x-request-by", "jetTask"),
-                                new Param("x-maxlimit", 150)
-                            )
-                            .ExecuteAsync("https://jsonplaceholder.typicode.com/comments");
-    PrintResponse(response);
-}
-
-//Post with plain JSON text body
-static async Task POST_WithJSONString() {
-
-    var jsonString = @"{""title"":""Foo"",""bar"":""Bar"",""userid"":1}";
-
-    //In this case => RawBody assumes you're gigin the data that's of type JSON
-    var response = await new JetRequest<dynamic>()
-                            .Post()
-                            .WithBody(
-                                new RawBody(ContentType.Json, jsonString)
-                            )
-                            .ExecuteAsync("https://jsonplaceholder.typicode.com/posts");
-    PrintResponse(response);
-}
-
-//Post with object as JSON body
-static async Task POST_WithObjectAsJSONBody() {
-
-    var instance = new {
-        Title = "Foo",
-        Bar = "Bar",
-        UserId = 1
-    };
-
-    //In this case => RawBody assumes you want to serialize this object as JSON
-    var response = await new JetRequest<dynamic>()
-                            .Post()
-                            .WithBody(
-                                new RawBody(ContentType.Json, instance)
-                            )
-                            .ExecuteAsync("https://jsonplaceholder.typicode.com/posts");
-    PrintResponse(response);
-}
 
 
-//Put with object as JSON body
-static async Task PUT_WithObjectAsJSONBody() {
+const string BASE_URL = "https://localhost:7177/WeatherForecast";
 
-    var instance = new {
-        Title = "Foo",
-        Bar = "Bar",
-        UserId = 1
-    };
+//Default Get
+var res1 = await new JetRequest<dynamic>()
+                     .ExecuteAsync($"{BASE_URL}");
 
-    var response = await new JetRequest<dynamic>()
-                            .Put()
-                            .WithBody(
-                                new RawBody(ContentType.Json, instance)
-                            )
-                            .ExecuteAsync("https://jsonplaceholder.typicode.com/posts/1");
-    PrintResponse(response);
-}
+//Get with query prams
+var res2 = await new JetRequest<dynamic>()
+                     .WithQueries(
+                        new Param("fname", "Sangeeth"),
+                        new Param("lname", "Nandakumar")
+                     )
+                     .ExecuteAsync($"{BASE_URL}");
+
+//Get with header params
+var res3 = await new JetRequest<dynamic>()
+                     .WithHeaders(
+                        new Param("header1", "Sangeeth"),
+                        new Param("header2", "Nandakumar")
+                      )
+                     .ExecuteAsync($"{BASE_URL}/HeaderTest");
+
+
+//Get with cookie parameter
+var res4 = await new JetRequest<dynamic>()
+                     .WithCookies(
+                        new Param("fname", "Sangeeth"),
+                        new Param("lname", "Nandakumar")
+                      )
+                     .ExecuteAsync($"{BASE_URL}/CookieTest");
+
+//BODY
+
+//With FORM body
+var res5 = await new JetRequest<dynamic>()
+                     .Post()
+                     .WithFormData(
+                        new Param("fname", "Sangeeth"),
+                        new Param("lname", "Nandakumar")
+                      )
+                     .ExecuteAsync($"{BASE_URL}/FormTest");
+
+//With RAW body
+var res6 = await new JetRequest<dynamic>()
+                     .Post()
+                     .WithBody(
+                        new RawBody(ContentType.Json, new WeatherForecast
+                        {
+                            Date = DateOnly.Parse("28-10-1996"),
+                            Summary = "Summry",
+                            TemperatureC = 32,
+                        })
+                     )
+                     .ExecuteAsync($"{BASE_URL}");
+
+var res7 = await new JetRequest<dynamic>()
+                     .Post()
+                     .WithBody(
+                        new RawBody(ContentType.Json, JsonSerializer.Serialize(
+                            new WeatherForecast
+                            {
+                                Date = DateOnly.Parse("28-10-1996"),
+                                Summary = "Summary",
+                                TemperatureC = 32,
+                            })
+                        )
+                     )
+                     .ExecuteAsync($"{BASE_URL}");
+
+
+
+
+
 
 
 //With Basic Authentication

@@ -10,6 +10,5 @@ namespace Twileloop.JetAPI.Types {
 
         public string Key { get; set; }
         public object Value { get; set; }
-        public string ValueString { get => JsonSerializer.Serialize(Value); }
     }
 }

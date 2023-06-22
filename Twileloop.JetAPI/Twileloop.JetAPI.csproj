@@ -13,6 +13,7 @@
     <PackageTags>httpclient, api, client</PackageTags>
     <Description>A fully free open source cross platform fluent APIClient for your .NET application</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="7.0.2" />
+    <PackageReference Include="System.Text.Json" Version="7.0.3" />
   </ItemGroup>
 
   <ItemGroup>
