@@ -13,8 +13,10 @@ using Twileloop.JetAPI.Authentication;
 using Twileloop.JetAPI.Body;
 using Twileloop.JetAPI.Types;
 
-namespace Twileloop.JetAPI {
-    public class JetRequest<T> {
+namespace Twileloop.JetAPI
+{
+    public class JetRequest<T>
+    {
 
         private Request _apiRequest;
         private Interceptor _interceptor;
@@ -27,7 +29,8 @@ namespace Twileloop.JetAPI {
         /// <summary>
         /// Initializes a new instance of the JetRequest class with default HttpMethod Get.
         /// </summary>
-        public JetRequest() {
+        public JetRequest()
+        {
             _apiRequest = new Request();
         }
 
@@ -35,7 +38,8 @@ namespace Twileloop.JetAPI {
         /// Initializes a new instance of the JetRequest class with the specified HttpMethod.
         /// </summary>
         /// <param name="method">The HttpMethod to use for the request.</param>
-        private JetRequest(HttpMethod method) {
+        private JetRequest(HttpMethod method)
+        {
             _apiRequest = new Request(method);
         }
 
@@ -43,7 +47,8 @@ namespace Twileloop.JetAPI {
         /// Returns a new JetRequest instance with HttpMethod Get.
         /// </summary>
         /// <returns>A new JetRequest instance with HttpMethod Get.</returns>
-        public JetRequest<T> Get() {
+        public JetRequest<T> Get()
+        {
             return new JetRequest<T>(HttpMethod.Get);
         }
 
@@ -51,7 +56,8 @@ namespace Twileloop.JetAPI {
         /// Returns a new JetRequest instance with HttpMethod Post.
         /// </summary>
         /// <returns>A new JetRequest instance with HttpMethod Post.</returns>
-        public JetRequest<T> Post() {
+        public JetRequest<T> Post()
+        {
             return new JetRequest<T>(HttpMethod.Post);
         }
 
@@ -59,7 +65,8 @@ namespace Twileloop.JetAPI {
         /// Returns a new JetRequest instance with HttpMethod Put.
         /// </summary>
         /// <returns>A new JetRequest instance with HttpMethod Put.</returns>
-        public JetRequest<T> Put() {
+        public JetRequest<T> Put()
+        {
             return new JetRequest<T>(HttpMethod.Put);
         }
 
@@ -67,7 +74,8 @@ namespace Twileloop.JetAPI {
         /// Returns a new JetRequest instance with HttpMethod Patch.
         /// </summary>
         /// <returns>A new JetRequest instance with HttpMethod Patch.</returns>
-        public JetRequest<T> Patch() {
+        public JetRequest<T> Patch()
+        {
             return new JetRequest<T>(new HttpMethod("PATCH"));
         }
 
@@ -77,15 +85,29 @@ namespace Twileloop.JetAPI {
         /// <param name="headers">The headers to add to the request.</param>
         /// <returns>The current JetRequest instance.</returns>
         /// <exception cref="ArgumentNullException">Thrown when headers is null.</exception>
-        public JetRequest<T> WithHeaders(params Param[] headers) {
+        public JetRequest<T> WithHeaders(params Param[] headers)
+        {
             if (headers == null) throw new ArgumentNullException(nameof(headers));
 
-            foreach (var param in headers) {
+            foreach (var param in headers)
+            {
                 if (param.Key == null) throw new ArgumentNullException(nameof(param.Key));
                 if (param.Value == null) throw new ArgumentNullException(nameof(param.Value));
-                _apiRequest.Headers[param.Key] = param.ValueString;
+                _apiRequest.Headers[param.Key] = (string)param.Value;
             }
 
+            return this;
+        }
+        
+        public JetRequest<T> WithFormData(params Param[] formData)
+        {
+            if (formData == null) throw new ArgumentNullException(nameof(formData));
+            var formDatas = new Dictionary<string, string>();
+            foreach (var param in formData)
+            {
+                formDatas.Add(param.Key, (string)param.Value);
+            }
+            _apiRequest.HttpContent = new FormUrlEncodedContent(formDatas);
             return this;
         }
 
@@ -95,33 +117,40 @@ namespace Twileloop.JetAPI {
         /// <param name="queries">The queries to add to the request.</param>
         /// <returns>The current JetRequest instance.</returns>
         /// <exception cref="ArgumentNullException">Thrown when queries is null.</exception>
-        public JetRequest<T> WithQueries(params Param[] queries) {
+        public JetRequest<T> WithQueries(params Param[] queries)
+        {
             if (queries == null) throw new ArgumentNullException(nameof(queries));
 
-            foreach (var param in queries) {
+            foreach (var param in queries)
+            {
                 if (param.Key == null) throw new ArgumentNullException(nameof(param.Key));
                 if (param.Value == null) throw new ArgumentNullException(nameof(param.Value));
-                _apiRequest.QueryParameters[param.Key] = param.ValueString;
+                _apiRequest.QueryParameters[param.Key] = (string)param.Value;
             }
 
             return this;
         }
 
-        public JetRequest<T> WithBody(RawBody body) {
+        public JetRequest<T> WithBody(RawBody body)
+        {
             if (body == null) throw new ArgumentNullException(nameof(body));
             _apiRequest.HttpContent = new StringContent(body.Content, Encoding.UTF8, body.ContentType);
             return this;
         }
 
-        public JetRequest<T> WithAuthentication(BasicAuthentication basicAuth) {
-            if (basicAuth == null) {
+        public JetRequest<T> WithAuthentication(BasicAuthentication basicAuth)
+        {
+            if (basicAuth == null)
+            {
                 throw new ArgumentNullException(nameof(basicAuth));
             }
-            if (basicAuth.EncodeAsBase64) {
+            if (basicAuth.EncodeAsBase64)
+            {
                 var encodedCredentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{basicAuth.Username}:{basicAuth.Password}"));
                 _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", encodedCredentials);
             }
-            else {
+            else
+            {
                 _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", $"{basicAuth.Username}:{basicAuth.Password}");
             }
             return this;
@@ -133,8 +162,10 @@ namespace Twileloop.JetAPI {
         /// <param name="apiKey">The API key information to use for authentication.</param>
         /// <returns>The JetRequest instance.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="apiKey"/> is null.</exception>
-        public JetRequest<T> WithAuthentication(ApiKey apiKey) {
-            if (apiKey == null) {
+        public JetRequest<T> WithAuthentication(ApiKey apiKey)
+        {
+            if (apiKey == null)
+            {
                 throw new ArgumentNullException(nameof(apiKey));
             }
             _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey.HeaderName, apiKey.APIKey);
@@ -147,8 +178,10 @@ namespace Twileloop.JetAPI {
         /// <param name="bearerToken">The bearer token information to use for authentication.</param>
         /// <returns>The JetRequest instance.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="bearerToken"/> is null.</exception>
-        public JetRequest<T> WithAuthentication(BearerToken bearerToken) {
-            if (bearerToken == null) {
+        public JetRequest<T> WithAuthentication(BearerToken bearerToken)
+        {
+            if (bearerToken == null)
+            {
                 throw new ArgumentNullException(nameof(bearerToken));
             }
             _apiRequest.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken.Token);
@@ -161,7 +194,8 @@ namespace Twileloop.JetAPI {
         /// <typeparam name="T"></typeparam>
         /// <param name="instance">An instance of Interceptor</param>
         /// <returns></returns>
-        public JetRequest<T> WithInterceptor<V>(V instance) where V : Interceptor {
+        public JetRequest<T> WithInterceptor<V>(V instance) where V : Interceptor
+        {
             _interceptor = instance;
             return this;
         }
@@ -172,7 +206,8 @@ namespace Twileloop.JetAPI {
         /// <typeparam name="T"></typeparam>
         /// <param name="instance">An instance of Interceptor</param>
         /// <returns></returns>
-        public JetRequest<T> WithCaptures(Action<JetResponse<T>> onSuccess, Action<JetResponse<T>> onFailure) {
+        public JetRequest<T> WithCaptures(Action<JetResponse<T>> onSuccess, Action<JetResponse<T>> onFailure)
+        {
             _successCapture = onSuccess;
             _failureCapture = onFailure;
             return this;
@@ -183,7 +218,8 @@ namespace Twileloop.JetAPI {
         /// </summary>
         /// <param name="extendedCaptures"></param>
         /// <returns></returns>
-        public JetRequest<T> WithCaptures(params (HttpStatusCode, Action)[] extendedCaptures) {
+        public JetRequest<T> WithCaptures(params (HttpStatusCode, Action)[] extendedCaptures)
+        {
             _extendedCaptures = extendedCaptures.ToList();
             return this;
         }
@@ -193,8 +229,9 @@ namespace Twileloop.JetAPI {
         /// </summary>
         /// <param name="requestCookies"></param>
         /// <returns></returns>
-        public JetRequest<T> WithCookies(params Param[] cookies) {
-            var cookieHeader = string.Join("; ", cookies.Select(c => $"{c.Key}={c.ValueString}"));
+        public JetRequest<T> WithCookies(params Param[] cookies)
+        {
+            var cookieHeader = string.Join("; ", cookies.Select(c => $"{c.Key}={(string)c.Value}"));
             _apiRequest.Headers.Add("Cookie", cookieHeader);
             return this;
         }
@@ -204,7 +241,8 @@ namespace Twileloop.JetAPI {
         /// </summary>
         /// <param name="responseContentType"></param>
         /// <returns></returns>
-        public JetRequest<T> FetchAs(ContentType responseContentType = ContentType.Json) {
+        public JetRequest<T> FetchAs(ContentType responseContentType = ContentType.Json)
+        {
             _contentType = responseContentType;
             return this;
         }
@@ -214,7 +252,8 @@ namespace Twileloop.JetAPI {
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>
-        public JetRequest<T> HandleExceptions(Action<Exception> exception) {
+        public JetRequest<T> HandleExceptions(Action<Exception> exception)
+        {
             _onException = exception;
             return this;
         }
@@ -226,19 +265,23 @@ namespace Twileloop.JetAPI {
         /// <param name="url">The URL to send the HTTP request to.</param>
         /// <returns>A task representing the asynchronous operation. The result of the task is the deserialized response.</returns>
         /// <exception cref="HttpRequestException">Thrown when the HTTP request is not successful (status code is not in the 2xx range).</exception>
-        public async Task<JetResponse<T>> ExecuteAsync(string url) {
-            try {
+        public async Task<JetResponse<T>> ExecuteAsync(string url)
+        {
+            try
+            {
                 _interceptor?.OnInit();
                 var uriBuilder = new UriBuilder(url);
                 uriBuilder.Query = BuildQueryString(_apiRequest.QueryParameters);
 
-                var request = new HttpRequestMessage {
+                var request = new HttpRequestMessage
+                {
                     Method = _apiRequest.HttpMethod,
                     RequestUri = uriBuilder.Uri,
                     Content = _apiRequest.HttpContent,
                 };
 
-                foreach (var (key, value) in _apiRequest.Headers) {
+                foreach (var (key, value) in _apiRequest.Headers)
+                {
                     request.Headers.Add(key, value);
                 }
 
@@ -248,9 +291,12 @@ namespace Twileloop.JetAPI {
                 _interceptor?.OnResponseReceived();
 
                 //Extended captures
-                if (_extendedCaptures != null) {
-                    foreach (var capture in _extendedCaptures) {
-                        if (capture.Item1 == response.StatusCode) {
+                if (_extendedCaptures != null)
+                {
+                    foreach (var capture in _extendedCaptures)
+                    {
+                        if (capture.Item1 == response.StatusCode)
+                        {
                             capture.Item2();
                             break;
                         }
@@ -258,83 +304,112 @@ namespace Twileloop.JetAPI {
                 }
 
                 //Basic captures
-                if (!response.IsSuccessStatusCode) {
-                    var errorResponse = new JetResponse<T> {
-                        StatusCode = response.StatusCode,
-                        Content = string.Empty,
-                        Data = default,
-                        IsSuccessfull = false,
-                        ResponseCookies = new Dictionary<string, string>(),
-                        ResponseHeaders = new Dictionary<string, string>(),
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorResponse = new JetResponse<T>
+                    {
+                        Status = response.StatusCode,
+                        StatusCode = (int)response.StatusCode,
+                        Message = "Request Failed",
+                        IsSuccess = false,
+                        Response = new ResponseData<T>
+                        {
+                            Binary = await ReadStreamAsByteArray(responseStream),
+                            Content = await response.Content.ReadAsStringAsync(),
+                            ResponseCookies = new Dictionary<string, string>(),
+                            ResponseHeaders = new Dictionary<string, string>(),
+                        }
                     };
                     _failureCapture?.Invoke(errorResponse);
                     return errorResponse;
                 }
 
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                var jetResponse = new JetResponse<T> {
-                    Content = await response.Content.ReadAsStringAsync(),
-                    StatusCode = response.StatusCode,
-                    IsSuccessfull = response.IsSuccessStatusCode,
-                    ResponseHeaders = response.Headers.ToDictionary(h => h.Key, h => string.Join(",", h.Value)),
-                    Binary = await ReadStreamAsByteArray(responseStream)
+                var jetResponse = new JetResponse<T>
+                {
+                    Status = response.StatusCode,
+                    StatusCode = (int)response.StatusCode,
+                    IsSuccess = response.IsSuccessStatusCode,
+                    Message = "Request Successfull",
+                    Response = new ResponseData<T>
+                    {
+                        Content = await response.Content.ReadAsStringAsync(),
+                        ResponseHeaders = response.Headers.ToDictionary(h => h.Key, h => string.Join(",", h.Value)),
+                        Binary = await ReadStreamAsByteArray(responseStream)
+                    },
                 };
                 _successCapture?.Invoke(jetResponse);
 
                 //Response headers
                 var isResponseCookieExists = response.Headers.Any(x => x.Key == "Set-Cookie");
-                if (isResponseCookieExists) {
+                if (isResponseCookieExists)
+                {
                     var responseCookie = new Dictionary<string, string>();
-                    foreach (var header in response.Headers.GetValues("Set-Cookie")) {
-                        foreach (var cookie in header.Split(';')) {
+                    foreach (var header in response.Headers.GetValues("Set-Cookie"))
+                    {
+                        foreach (var cookie in header.Split(';'))
+                        {
                             var cookieParts = cookie.Trim().Split('=');
-                            if (cookieParts.Length == 2) {
+                            if (cookieParts.Length == 2)
+                            {
                                 var key = cookieParts[0];
                                 var value = cookieParts[1];
-                                if (responseCookie.ContainsKey(key)) {
+                                if (responseCookie.ContainsKey(key))
+                                {
                                     // Update existing key
                                     responseCookie[key] = value;
                                 }
-                                else {
+                                else
+                                {
                                     // Add new key-value pair
                                     responseCookie.Add(key, value);
                                 }
                             }
                         }
                     }
-                    jetResponse.ResponseCookies = responseCookie;
+                    jetResponse.Response.ResponseCookies = responseCookie;
                 }
 
                 //Response data
-                if (jetResponse.IsSuccessfull) {
-                    switch (_contentType) {
+                if (jetResponse.IsSuccess)
+                {
+                    switch (_contentType)
+                    {
                         case ContentType.Json:
-                            if (jetResponse.Content != null) {
-                                jetResponse.Data = JsonSerializer.Deserialize<T>(jetResponse.Content);
+                            if (jetResponse.Response.Content != null)
+                            {
+                                jetResponse.Response.Data = JsonSerializer.Deserialize<T>(jetResponse.Response.Content);
                             }
                             break;
                         case ContentType.XML:
                             XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
-                            jetResponse.Data = (T)xmlSerializer.Deserialize(responseStream);
+                            jetResponse.Response.Data = (T)xmlSerializer.Deserialize(responseStream);
                             break;
                         default:
-                            jetResponse.Data = default;
+                            jetResponse.Response.Data = default;
                             break;
                     }
                 }
 
                 return jetResponse;
             }
-            catch (Exception ex) {
-                if (_onException != null) {
+            catch (Exception ex)
+            {
+                if (_onException != null)
+                {
                     _onException(ex);
                 }
-                return new JetResponse<T> {
-                    Content = string.Empty,
-                    Data = default,
-                    IsSuccessfull = false,
-                    ResponseCookies = new Dictionary<string, string>(),
-                    ResponseHeaders = new Dictionary<string, string>(),
+                return new JetResponse<T>
+                {
+                    IsSuccess = false,
+                    Message = "An error cooured within JetAPI library",
+                    Response = new ResponseData<T>
+                    {
+                        Content = string.Empty,
+                        Data = default,
+                        ResponseCookies = new Dictionary<string, string>(),
+                        ResponseHeaders = new Dictionary<string, string>(),
+                    }
                 };
             }
         }
@@ -344,7 +419,8 @@ namespace Twileloop.JetAPI {
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
-        private async Task<byte[]> ReadStreamAsByteArray(Stream stream) {
+        private async Task<byte[]> ReadStreamAsByteArray(Stream stream)
+        {
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
             return ms.ToArray();
@@ -355,17 +431,20 @@ namespace Twileloop.JetAPI {
         /// </summary>
         /// <param name="queries"></param>
         /// <returns></returns>
-        private static string BuildQueryString(Dictionary<string, string> queries) {
+        private static string BuildQueryString(Dictionary<string, string> queries)
+        {
             var queryString = new StringBuilder();
 
-            foreach (var (key, value) in queries) {
+            foreach (var (key, value) in queries)
+            {
                 queryString.Append(Uri.EscapeDataString(key));
                 queryString.Append("=");
                 queryString.Append(Uri.EscapeDataString(value));
                 queryString.Append("&");
             }
 
-            if (queryString.Length > 0) {
+            if (queryString.Length > 0)
+            {
                 queryString.Length--;
             }
 
