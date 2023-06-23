@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/sangeethnandakumar/Twileloop.JetAPI">
-    <img src="https://iili.io/HgOLhu9.png" alt="Logo" width="80" height="80">
+    <img src="https://iili.io/HPX9i5g.png" alt="Logo" width="80" height="80">
   </a>
 
   <h1 align="center"> Twileloop.JetAPI </h1>
